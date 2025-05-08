@@ -4,10 +4,14 @@ const bcrypt = require('bcryptjs');
 
 
 const loginOrRegister = async (req, res) => {
-  const {username, password } = req.body
+  const { username, password } = req.body
 
-  try{
-    let user = await User.findOne({username});
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username and password are required." });
+  }
+
+  try {
+    let user = await User.findOne({ username });
 
     // if(user){
     //   if(user.password === password){
@@ -17,49 +21,50 @@ const loginOrRegister = async (req, res) => {
     //     }
     // }
 
-    if(user){
+    if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
-      if(!isMatch){
+      if (!isMatch) {
         return res.status(401).json({ error: 'Invaild Password' });
       }
 
       // Create token 
-      const token = jwt.sign({id: user._id}, process.env.JWT_SECRET,{
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: '1h',
       });
 
-      return res.json({message: 'Login succes', token});
+      return res.json({ message: 'Login succes', token });
     }
 
     //create a new user
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password,salt)
+    const hashedPassword = await bcrypt.hash(password, salt)
 
 
 
     const newUser = new User
-    ({
-      username,
-      password:hashedPassword,
-});
+      ({
+        username,
+        password: hashedPassword,
+      });
     await newUser.save();
 
 
-    const token = jwt.sign({id: newUser._id }, process.env.JWT_SECRET,{
-      expiresIn:'1h'
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: '1h'
     });
 
 
     return res.json({ message: "User created successfully", token });
 
-  }catch(err){
+  } catch (err) {
+    console.error("Server error:", err);
     res.status(500).json({ error: 'Server error' });
   }
 
-} ;
+};
 
 
 
 
-module.exports = {loginOrRegister};
+module.exports = { loginOrRegister };
