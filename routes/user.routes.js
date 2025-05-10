@@ -12,5 +12,5 @@ router.post('/login', loginOrRegister);
 
 router.get('/profile', protect, getProfile);
 
-router.get('/all-user', protect, getAllUsers)
+router.get('/all-user', getAllUsers)
 module.exports = router;
