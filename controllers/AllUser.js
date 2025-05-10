@@ -6,7 +6,11 @@ const User = require("../model/User")
 const getAllUsers = async (req, res) => {
     
     try {
-        const user = await User.find({}, 'userName'); // only return the name field 
+        const user = await User.find({}, 'username'); // only return the name field 
+        const result = user.map( u => ({
+            id: u._id,  
+            name: u.username
+        }))
          console.log('Users fetched:', user);
         res.status(200).json(user);
     } catch (err) {
